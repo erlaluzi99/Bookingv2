@@ -20,22 +20,17 @@ namespace Booking.Application.User
 
         public async Task<Guid> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
         {
-            await Task.CompletedTask; // Simulating async operation, replace with actual async code if needed
+           var validationResult=_validation.Validate(request);
 
-            var user = new Booking.Domain.User 
+            var pw= BCrypt.Net.BCrypt.HashPassword(request.CreateUserDto.Password);
+            if (!validationResult.IsValid)
             {
-                FirstName = request.CreateUserDto.FirstName,
-                LastName = request.CreateUserDto.LastName,
-                Email = request.CreateUserDto.Email,
-                Password = request.CreateUserDto.Password,
-                CreatedOnUtc = DateTime.UtcNow
-            };
+                throw new ArgumentException("Invalid user data", nameof(request.CreateUserDto));
+            }
+            
 
-            // Save the user to the repository (assuming SaveAsync is a method in IUserRepository)
-            await _userRepository.SaveAsync(user, cancellationToken);
-
-            // Return the ID of the created user
-            return user.Id;
+            //await _userRepository.SaveAsync(user, cancellationToken);
+            //return user.Id;
         }
     }
 }
