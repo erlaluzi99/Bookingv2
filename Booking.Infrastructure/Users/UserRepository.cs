@@ -1,32 +1,48 @@
-﻿using System;
+﻿using Booking.Application.User;
+using Booking.Domain;
+using Booking.Infrastructure;
+using FluentValidation.Validators;
+using FluentValidation.Results;
+using FluentValidation;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Booking.Application.User;
-using Booking.Domain;
 
-namespace Booking.Infrastructure.Users
+public class UserRepository : IUserRepository
 {
-    public class UserRepository : IUserRepository
+    private readonly BookingDbContext _context;
+
+    public UserRepository(BookingDbContext dbContext)
     {
-        private readonly BookingDbContext _context;
+        _context = dbContext;
+    }
 
-            public UserRepository(BookingDbContext DBcontext) {
-             _context = DBcontext;
-              }
-        public Task<Guid> RegisterUserAsync(CreateUserDto createUserDto)
+    public async Task SaveAsync(User user, CancellationToken cancellationToken)
+    {
+        await _context.Users.AddAsync(user, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
+    }
+
+    public Task<Guid> RegisterUserAsync(CreateUserDto createUserDto)
+    {
+        var newUserId = Guid.NewGuid(); // Placeholder
+        return Task.FromResult(newUserId);
+    }
+
+    public Task SaveAsync(ValidationResult validationResult)
+    {
+        if (validationResult.IsValid)
+            return Task.CompletedTask;
+
+        
+        foreach (var error in validationResult.Errors)
         {
-            // Here you would typically interact with a database to save the user.
-            // For this example, we will just return a new Guid as if the user was created successfully.
-            var newUserId = Guid.NewGuid();
-            // Simulate saving the user to the database and returning the new user's ID.
-            return Task.FromResult(newUserId);
+            Console.WriteLine($"Validation Error: {error.PropertyName} - {error.ErrorMessage}");
         }
 
-        public Task SaveAsync(User user, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
+        throw new ValidationException(validationResult.Errors);
     }
 }
+
