@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using MediatR;
-using Booking.Application.User;
 
 namespace Booking.api.Controllers
 {
@@ -11,12 +9,11 @@ namespace Booking.api.Controllers
     {
         //USE MEDIATR SENDER
         [HttpPost("register")]
-
-        public async Task<IResult> Register([FromBody]CreateUserDto createUserDto)
+        public async Task<IActionResult> Register([FromBody] CreateUserDto createUserDto)
         {
             var command = new RegisterUserCommand { CreateUserDto = createUserDto };
             var result = await _sender.Send(command);
-            return Results.Ok(result);
+            return Ok(result);
         }
     }
 }
