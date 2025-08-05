@@ -33,7 +33,7 @@ namespace Booking.api.Middlewares
             var result = JsonSerializer.Serialize(new
             {
                 StatusCode = context.Response.StatusCode,
-                Message = "Internal Server Error",
+                Message = "Internal Server Error",//test sentence
                 Details = exception.Message //test
             });
 
