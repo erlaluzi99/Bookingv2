@@ -1,9 +1,8 @@
 ﻿using Booking.api.DTOs;
 using Booking.Application.User;
 using Booking.Infrastructure.Contracts;
-using Booking.Infrastructure.Migrations;
 using MediatR;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Booking.api.Controllers
@@ -22,23 +21,25 @@ namespace Booking.api.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] CreateUserDto createUserDto)
+        [AllowAnonymous]
+        public async Task<IActionResult> Register([FromBody] CreateUserDto dto, CancellationToken ct)
         {
-            var command = new RegisterUserCommand { CreateUserDto = createUserDto };
-            var result = await _sender.Send(command);
-            return Ok(result);
+            var id = await _sender.Send(new RegisterUserCommand { CreateUserDto = dto }, ct);
+            return CreatedAtAction(nameof(Register), new { id }, new { id });
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginRequestDto loginRequest)
+        [AllowAnonymous]
+        public async Task<IActionResult> Login([FromBody] LoginRequestDto login)
         {
-            var token = await _authManager.LoginAsync(loginRequest.Email, loginRequest.Password);
+            if (string.IsNullOrWhiteSpace(login.Email) || string.IsNullOrWhiteSpace(login.Password))
+                return BadRequest("Email and password are required.");
 
-            if (token == null)
-                return Unauthorized("Invalid email or password");
-
-            return Ok(new { Token = token });
+            var token = await _authManager.LoginAsync(login.Email, login.Password);
+            if (token == null) return Unauthorized("Invalid email or password");
+            return Ok(new { token });
         }
     }
 }
+
 

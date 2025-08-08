@@ -1,8 +1,6 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using Booking.Application.User;
 using FluentValidation;
 using FluentValidation.Results;
 
@@ -23,9 +21,7 @@ namespace Booking.Application.User
         {
             ValidationResult validationResult = _validation.Validate(request);
             if (!validationResult.IsValid)
-            {
                 throw new ValidationException(validationResult.Errors);
-            }
 
             return await _userService.RegisterUserAsync(request.CreateUserDto, cancellationToken);
         }

@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MediatR;
+﻿using MediatR;
 
 namespace Booking.Application.User
 {
     public class RegisterUserCommand : IRequest<Guid>
     {
-        public CreateUserDto CreateUserDto { get; set; }
+        public CreateUserDto CreateUserDto { get; set; } = default!; 
     }
 }
+

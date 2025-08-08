@@ -1,9 +1,11 @@
 ﻿using Booking.Application.User;
+using Booking.Infrastructure.AuthService;
 using Booking.Infrastructure.Users;
-using Microsoft.EntityFrameworkCore;
+using Booking.Infrastructure.Contracts;
+using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-
+using System.Reflection;
 
 namespace Booking.Infrastructure
 {
@@ -13,19 +15,18 @@ namespace Booking.Infrastructure
             this IServiceCollection services,
             IConfiguration configuration)
         {
-            services.AddDbContext<BookingDbContext>(options =>
+            //per mediatR
+            services.AddMediatR(cfg =>
             {
-                options.UseSqlServer(configuration.GetConnectionString("BookingConnectionString"));
+                cfg.RegisterServicesFromAssembly(Assembly.Load("Booking.Application"));
             });
 
-            services.AddScoped<IUserRepository, UserRepository>();
+           
 
             services.AddScoped<IUserService, UserService>();
-
+            services.AddScoped<IAuthManager, AuthManager>();
 
             return services;
         }
     }
 }
-
-
