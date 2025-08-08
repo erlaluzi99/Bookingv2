@@ -15,7 +15,7 @@ namespace Booking.Infrastructure
 
         public BookingDbContext(DbContextOptions<BookingDbContext> options) : base(options)
         {
-
+          
         }
        
         public DbSet<Apartment> Apartments { get; set; }

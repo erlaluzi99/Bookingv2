@@ -1,10 +1,9 @@
-﻿using Booking.Infrastructure.AuthService;
-using Booking.Infrastructure.Contracts;
-using Booking1.Application.Users2;
+﻿using Booking.Application.User;
+using Booking.Infrastructure.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System;
+
 
 namespace Booking.Infrastructure
 {
@@ -16,9 +15,8 @@ namespace Booking.Infrastructure
         {
             services.AddDbContext<BookingDbContext>(options =>
             {
-                options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
+                options.UseSqlServer(configuration.GetConnectionString("BookingConnectionString"));
             });
-
 
             services.AddScoped<IUserRepository, UserRepository>();
 
@@ -27,6 +25,7 @@ namespace Booking.Infrastructure
 
             return services;
         }
-
     }
+}
+
 

@@ -2,49 +2,32 @@
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using Booking.Domain;
+using Booking.Application.User;
 using FluentValidation;
+using FluentValidation.Results;
 
 namespace Booking.Application.User
 {
     public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, Guid>
     {
-        private readonly IUserRepository _userRepository;
+        private readonly IUserService _userService;
         private readonly RegisterUserCommandValidation _validation;
 
-        public RegisterUserCommandHandler(IUserRepository userRepository)
+        public RegisterUserCommandHandler(IUserService userService)
         {
-            _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+            _userService = userService;
             _validation = new RegisterUserCommandValidation();
         }
 
         public async Task<Guid> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
         {
-            
-            var validationResult = _validation.Validate(request);
+            ValidationResult validationResult = _validation.Validate(request);
             if (!validationResult.IsValid)
             {
-                await _userRepository.SaveAsync(validationResult);
+                throw new ValidationException(validationResult.Errors);
             }
 
-          
-            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.CreateUserDto.Password);
-
-            
-            var newUser = new Booking.Domain.User(
-                Guid.NewGuid(),
-                request.CreateUserDto.FirstName,
-                request.CreateUserDto.LastName,
-                request.CreateUserDto.Email,
-                hashedPassword,
-                request.CreateUserDto.Country
-            );
-
-            // Save to database
-            await _userRepository.SaveAsync(newUser, cancellationToken);
-
-            return newUser.Id;
+            return await _userService.RegisterUserAsync(request.CreateUserDto, cancellationToken);
         }
-
     }
 }

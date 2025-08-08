@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Logging;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Booking.api
 {
@@ -14,21 +15,16 @@ namespace Booking.api
             _logger = logger;
         }
 
-        public async ValueTask HandleAsync(ExceptionContext context)
+        public async ValueTask<bool> TryHandleAsync(HttpContext context, Exception exception, CancellationToken cancellationToken)
         {
-            var exception = context.Exception;
             _logger.LogError(exception, "An unhandled exception occurred.");
 
-            context.HttpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
-            context.HttpContext.Response.ContentType = "application/json";
+            context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+            await context.Response.WriteAsync("An unexpected error occurred. Please try again later.", cancellationToken);
 
-            var result = new
-            {
-                Message = "An unexpected error occurred. Please try again later.",
-                Error = exception.Message // optionally hide this in production
-            };
-
-            await context.HttpContext.Response.WriteAsJsonAsync(result);
+            return true;
         }
     }
 }
+
+
